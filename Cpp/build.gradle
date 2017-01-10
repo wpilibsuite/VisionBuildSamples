@@ -31,7 +31,6 @@ ext.use32Bit = false
 
 
 
-
 // Shouldn't need to change anything below this point
 ext.getPlatformPath2 = { targetPlatform ->
     if (targetPlatform.architecture.arm) {
@@ -86,7 +85,6 @@ repositories {
     mavenCentral()
     maven {
       url "http://first.wpi.edu/FRC/roborio/maven/release"
-      url "${System.getProperty('user.home')}/releases/maven/release"
     }
 }
 

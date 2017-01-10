@@ -9,14 +9,16 @@ apply plugin: 'application'
 
 // This is where you select which operating system to build for.
 // Uncomment the line below to build for windows
-ext.buildType = "windows"
+//ext.buildType = "windows"
 // Uncomment the line below to build for a Raspberry Pi running raspbian
-//ext.buildType = "arm-raspbian"
+ext.buildType = "arm-raspbian"
 // Uncomment the line below to build for an armhf device such as a Jetson or a Beaglebone Black
 //ext.buildType = "armhf"
 
-
+// Change the line below if you change the name of your main Java class
 mainClassName = 'Main'
+// Change the line below to change the name of the output jar
+def projectName = 'CameraVision'
 
 // Shouldn't need to change anything below this point
 apply from: 'dependencies.gradle'
@@ -25,7 +27,6 @@ repositories {
     mavenCentral()
     maven {
       url "http://first.wpi.edu/FRC/roborio/maven/release"
-      url "${System.getProperty('user.home')}/releases/maven/release"
     }
 }
 
@@ -35,25 +36,17 @@ dependencies {
   compile 'org.opencv:opencv-java:+'
 }
 
-def outputDir = file("${rootDir}/output")
-
-task copyToOutput(type: Copy) {
-  dependsOn shadowJar
-  dependsOn unzipOpenCv
-  destinationDir = outputDir
-  from (file(shadowJar.archivePath)) {
-  }  
-  from (openCvUnzipLocation) {
-    exclude 'META-INF'
-    exclude '**/MANIFEST.MF'
-  }
+jar {
+  baseName = projectName
 }
 
-distZip.dependsOn unzipOpenCv
-distTar.dependsOn unzipOpenCv
+shadowJar {
+  baseName = projectName
+}
 
 distributions {
   main {
+    baseName = projectName
     contents {
       from (openCvUnzipLocation) {
         exclude 'META-INF'
@@ -63,6 +56,27 @@ distributions {
     }
   }
 }
+
+def outputDir = file("${rootDir}/output")
+
+task copyToOutput(type: Copy) {
+  dependsOn shadowJar
+  dependsOn unzipOpenCv
+  dependsOn distZip
+  destinationDir = outputDir
+  from (file(shadowJar.archivePath)) {
+  }
+  from (distZip) {
+
+  }
+  from (openCvUnzipLocation) {
+    exclude 'META-INF'
+    exclude '**/MANIFEST.MF'
+  }
+}
+
+distZip.dependsOn unzipOpenCv
+distTar.dependsOn unzipOpenCv
 
 applicationDefaultJvmArgs = ["-Djava.library.path=${openCvUnzipLocation}"]
 
