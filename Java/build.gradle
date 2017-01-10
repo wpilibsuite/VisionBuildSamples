@@ -49,6 +49,21 @@ task copyToOutput(type: Copy) {
   }
 }
 
+distZip.dependsOn unzipOpenCv
+distTar.dependsOn unzipOpenCv
+
+distributions {
+  main {
+    contents {
+      from (openCvUnzipLocation) {
+        exclude 'META-INF'
+        exclude '**/MANIFEST.MF'
+        into 'bin/'
+      }
+    }
+  }
+}
+
 applicationDefaultJvmArgs = ["-Djava.library.path=${openCvUnzipLocation}"]
 
 build.dependsOn shadowJar
