@@ -1,0 +1,60 @@
+// Do not mess with the following 6 lines
+plugins {
+  id 'com.github.johnrengelman.shadow' version '1.2.4'
+}
+
+apply plugin: 'java'
+apply plugin: 'application'
+
+
+// This is where you select which operating system to build for.
+// Uncomment the line below to build for windows
+//ext.buildType = "windows"
+// Uncomment the line below to build for a Raspberry Pi running raspbian
+//ext.buildType = "arm-raspbian"
+// Uncomment the line below to build for an armhf device such as a Jetson or a Beaglebone Black
+//ext.buildType = "armhf"
+
+
+mainClassName = 'Main'
+
+// Shouldn't need to change anything below this point
+apply from: 'dependencies.gradle'
+
+repositories {
+    mavenCentral()
+    maven {
+      url "http://first.wpi.edu/FRC/roborio/maven/release"
+      url "${System.getProperty('user.home')}/releases/maven/development"
+    }
+}
+
+dependencies {
+  compile ntcoreDep()
+  compile cscoreDep()
+  compile 'org.opencv:opencv-java:+'
+}
+
+def outputDir = file("${rootDir}/output")
+
+task copyToOutput(type: Copy) {
+  dependsOn shadowJar
+  dependsOn unzipOpenCv
+  destinationDir = outputDir
+  from (file(shadowJar.archivePath)) {
+  }  
+  from (openCvUnzipLocation) {
+    exclude 'META-INF'
+    exclude '**/MANIFEST.MF'
+  }
+}
+
+applicationDefaultJvmArgs = ["-Djava.library.path=${openCvUnzipLocation}"]
+
+build.dependsOn shadowJar
+build.dependsOn copyToOutput
+run.dependsOn unzipOpenCv
+
+clean {
+    delete outputDir
+}
