@@ -1,7 +1,7 @@
 ext.ntcoreDep = { ->
     def classifier
     if (buildType == "windows") {
-      classifier = "windows"
+      classifier = "windows2015"
     } else {
       classifier = buildType
     }
@@ -11,7 +11,7 @@ ext.ntcoreDep = { ->
 ext.cscoreDep = { ->
     def classifier
     if (buildType == "windows") {
-      classifier = "windows"
+      classifier = "windows2015"
     } else {
       classifier = buildType
     }
@@ -30,9 +30,9 @@ task downloadOpenCv() {
         def classifier
         if (buildType == "windows") {
           if (System.getProperty("os.arch") == "amd64") {
-            classifier = "windows-x86_64"
+            classifier = "windows-x86_64_2015"
           } else {
-            classifier = "windows-x86"
+            classifier = "windows-x86_2015"
           }
         } else if (buildType == "armhf") {
           classifier = "linux-armhf"

@@ -1,0 +1,45 @@
+import org.gradle.internal.os.OperatingSystem
+
+def appSetupModel = { project ->
+    project.model {
+        components {
+            CameraVision(NativeExecutableSpec) {
+                if (project.isArm) {
+                    targetPlatform 'arm'
+                } else {
+                    targetPlatform 'x86'
+                    targetPlatform 'x64'
+                }
+                setupDefines(project, binaries)
+
+                sources {
+                    cpp {
+                        source {
+                            srcDirs = ["${rootDir}/src"]
+                            includes = ['**/*.cpp']
+                        }
+                        exportedHeaders {
+                            srcDirs = ["${rootDir}/include", project.wpiUtilInclude, project.openCvInclude, 
+                                       project.csCoreInclude, project.ntCoreInclude]
+                            includes = ['**/*.h']
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+apply plugin: 'cpp'
+
+if (buildType == "windows") {
+  apply from: "${rootDir}/toolchains/native.gradle"
+} else {
+  apply from: "${rootDir}/toolchains/arm.gradle"
+}
+
+appSetupModel(project)
+useWpiUtil(project)
+useOpenCv(project)
+useCsCore(project)
+useNtCore(project)

@@ -23,6 +23,9 @@ public class Main {
     // By rules, this has to be between 1180 and 1190, so 1185 is a good choice
     int streamPort = 1185;
 
+    // This stores our reference to our mjpeg server for streaming the input image
+    MjpegServer inputStream = new MjpegServer("MJPEG Server", streamPort);
+
 
     // Uncomment one of the 2 following camera options
     // The top one receives a stream from another device, and performs operations based on that
@@ -36,14 +39,17 @@ public class Main {
     // CameraServer.getInstance().startAutomaticCapture("YourCameraNameHere");
     // "USB Camera 0" is the default if no string is specified
     String cameraName = "USB Camera 0";
-    HttpCamera camera = setHttpCamera(cameraName, streamPort);
+    HttpCamera camera = setHttpCamera(cameraName, inputStream);
     // It is possible for the camera to be null. If it is, that means no camera could
     // be found using NetworkTables to connect to. Create an HttpCamera by giving a specified stream
     // Note if this happens, no restream will be created
     if (camera == null) {
       camera = new HttpCamera("CoprocessorCamera", "YourURLHere");
+      inputStream.setSource(camera);
     }
-    */    
+    */
+    
+      
 
     /***********************************************/
 
@@ -52,7 +58,7 @@ public class Main {
     // This gets the image from a USB camera 
     // Usually this will be on device 0, but there are other overloads
     // that can be used
-    UsbCamera camera = setUsbCamera(0, streamPort);
+    UsbCamera camera = setUsbCamera(0, inputStream);
     // Set the resolution for our camera, since this is over USB
     camera.setResolution(640,480);
     */
@@ -91,7 +97,7 @@ public class Main {
     }
   }
 
-  private static HttpCamera setHttpCamera(String cameraName, int streamPort) {
+  private static HttpCamera setHttpCamera(String cameraName, MjpegServer server) {
     // Start by grabbing the camera from NetworkTables
     NetworkTable publishingTable = NetworkTable.getTable("CameraPublisher");
     // Wait for robot to connect. Allow this to be attempted indefinitely
@@ -109,8 +115,6 @@ public class Main {
 
 
     HttpCamera camera = null;
-    // This is an mjpeg stream that restreams the input image
-    MjpegServer cameraStream = null;
     if (!publishingTable.containsSubTable(cameraName)) {
       return null;
     }
@@ -126,20 +130,16 @@ public class Main {
       }
     }
     camera = new HttpCamera("CoprocessorCamera", fixedUrls.toArray(new String[0]));
-    cameraStream = new MjpegServer("MJPEG Server", 1185);
-    cameraStream.setSource(camera);
+    server.setSource(camera);
     return camera;
   }
 
-  private static UsbCamera setUsbCamera(int cameraId, int streamPort) {
+  private static UsbCamera setUsbCamera(int cameraId, MjpegServer server) {
     // This gets the image from a USB camera 
     // Usually this will be on device 0, but there are other overloads
     // that can be used
     UsbCamera camera = new UsbCamera("CoprocessorCamera", cameraId);
-    // This is an mjpeg stream that restreams the input image
-    // Choose an open port that you want to be able to access remotely.
-    MjpegServer cameraStream = new MjpegServer("MJPEG Server", streamPort);
-    cameraStream.setSource(camera);
+    server.setSource(camera);
     return camera;
   }
 }

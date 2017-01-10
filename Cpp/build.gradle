@@ -1,0 +1,125 @@
+// This is where you select which operating system to build for.
+// Uncomment the line below to build for windows
+ext.buildType = "windows"
+
+// Uncomment the 4 lines below starting with ext. to cross compile for a Raspberry Pi running raspbian.
+//ext.buildType = "arm-raspbian" // Do not change this string
+//ext.compilerPrefix = "arm-linux-gnueabihf-" // Should not have to change this string, see readme for more
+//ext.armSuffix = "-raspbian" // Do not change this string
+//ext.toolChainPath = "PathToCompilerHere"
+
+// Uncomment the 4 lines below starting with ext. to cross compile for an armhf device such as a Jetson or a Beaglebone Black
+//ext.buildType = "armhf" // Do not change this string
+//ext.compilerPrefix = "arm-linux-gnueabihf-" // Should not have to change this string, see readme for more
+//ext.armSuffix = "hf" // Do not change this string
+//ext.toolChainPath = "PathToCompilerHere" // See Readme to see what this needs to be specified to
+
+// Uncomment the 3 lines below starting with ext. to natively build for a Raspberry Pi running raspbian. Use this if you are building on th Pi itself
+//ext.buildType = "armhf"
+//ext.compilerPrefix = ""
+//ext.armSuffix = "hf"
+
+// Uncomment the 3 lines below starting with ext. to natively build for an armhf device such as a Jetson or a Beaglebone Black. Use this if you are building on the device itself
+//ext.buildType = "armhf"
+//ext.compilerPrefix = ""
+//ext.armSuffix = "hf"
+
+// Set this to true to use the 32 bit built binary rather then the 64 bit binary
+// Usually keep this false
+ext.use32Bit = false
+
+
+
+
+
+// Shouldn't need to change anything below this point
+ext.getPlatformPath2 = { targetPlatform ->
+    if (targetPlatform.architecture.arm) {
+        return 'Linux/arm'
+    } else if (targetPlatform.operatingSystem.linux) {
+        if (targetPlatform.architecture.amd64) {
+            return 'Linux/amd64'
+        } else {
+            return 'Linux/' + targetPlatform.architecture.name
+        }
+    } else if (targetPlatform.operatingSystem.windows) {
+        if (targetPlatform.architecture.amd64) {
+            return 'Windows/amd64'
+        } else {
+            return 'Windows/' + targetPlatform.architecture.name
+        }
+    } else if (targetPlatform.operatingSystem.macOsX) {
+        if (targetPlatform.architecture.amd64) {
+            return 'Mac OS X/x86_64'
+        } else {
+            return 'Mac OS X/' + targetPlatform.architecture.name
+        }
+    } else {
+        return targetPlatform.operatingSystem.name + '/' + targetPlatform.architecture.name
+    }
+}
+
+ext.getPlatformPath = { binary ->
+    return getPlatformPath2(binary.targetPlatform)
+}
+
+
+apply from: 'dependencies.gradle'
+
+ext.setupDefines = { project, binaries ->
+    binaries.all {
+        if (project.hasProperty('debug')) {
+            project.setupDebugDefines(cppCompiler, linker)
+        } else {
+            project.setupReleaseDefines(cppCompiler, linker)
+        }
+        tasks.withType(CppCompile) {
+            project.addWpiUtilLibraryLinks(it, linker, targetPlatform)
+            project.addCsCoreLibraryLinks(it, linker, targetPlatform)
+            project.addOpenCvLibraryLinks(it, linker, targetPlatform)
+            project.addNtCoreLibraryLinks(it, linker, targetPlatform)
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+      url "http://first.wpi.edu/FRC/roborio/maven/release"
+      url "${System.getProperty('user.home')}/releases/maven/release"
+    }
+}
+
+apply from: 'cpp.gradle'
+
+def outputDir = file("${rootDir}/output")
+
+task copyToOutput(type: Copy) {
+  dependsOn assemble
+  destinationDir = outputDir
+  model {
+            binaries {
+                withType(NativeExecutableBinarySpec) { binary ->
+                    from(binary.executableFile) {
+                      if (targetPlatform.operatingSystem.windows) {
+                          println targetPlatform.architecture.amd64
+                          if (targetPlatform.architecture.amd64) {
+                              into '64bit'
+                          } else {
+                              into '32bit'
+                          }
+                      }
+                      else {
+                        into 'arm'
+                      }
+                    }
+                }
+            }
+        }
+} 
+
+clean {
+    delete outputDir
+}
+
+build.dependsOn copyToOutput

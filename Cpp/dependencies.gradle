@@ -1,0 +1,301 @@
+ext.useWpiUtil = { project ->
+    project.tasks.create(name: "downloadWpiUtil") {
+        description = 'Downloads the wpiutil maven dependency.'
+        group = 'WPILib'
+        def depFolder = "${project.buildDir}/dependencies"
+        def utilZip = file("${depFolder}/wpiutil.zip")
+        outputs.file(utilZip)
+        def wpiUtil
+
+        doFirst {
+            def wpiUtilDependency
+            def classifier
+            if (buildType == "windows") {
+              classifier = "windows2015"
+            } else {
+              classifier = buildType
+            }
+            wpiUtilDependency = project.dependencies.create("edu.wpi.first.wpilib:wpiutil:+:${classifier}@zip")            
+            def wpiUtilConfig = project.configurations.detachedConfiguration(wpiUtilDependency)
+            wpiUtilConfig.setTransitive(false)
+            wpiUtil = wpiUtilConfig.files[0].canonicalFile
+        }
+
+        doLast {
+            copy {
+                from wpiUtil
+                rename 'wpiutil(.+)', 'wpiutil.zip'
+                into depFolder
+            }
+        }
+    }
+
+    def wpiUtilUnzipLocation = "${project.buildDir}/wpiutil"
+
+    // Create a task that will unzip the wpiutil files into a temporary build directory
+    project.tasks.create(name: "unzipWpiUtil", type: Copy) {
+        description = 'Unzips the wpiutil maven dependency so that the include files and libraries can be used'
+        group = 'WPILib'
+        dependsOn project.tasks.downloadWpiUtil
+        from zipTree(project.tasks.downloadWpiUtil.outputs.files.singleFile)
+        into wpiUtilUnzipLocation
+    }
+
+    project.ext.wpiUtil = wpiUtilUnzipLocation
+    project.ext.wpiUtilInclude = "$wpiUtilUnzipLocation/include"
+
+    project.ext.addWpiUtilLibraryLinks = { compileTask, linker, targetPlatform ->
+        compileTask.dependsOn project.tasks.unzipWpiUtil
+        String path = project.getPlatformPath2(targetPlatform)
+        if (targetPlatform.operatingSystem.windows) {
+            linker.args "${project.wpiUtil}/${path}/wpiutil.lib"
+        } else {
+            linker.args "${project.wpiUtil}/${path}/libwpiutil.a"
+        }
+    }
+}
+
+ext.useNtCore = { project ->
+    project.tasks.create(name: "downloadNtCore") {
+        description = 'Downloads the ntcore maven dependency.'
+        group = 'WPILib'
+        def depFolder = "${project.buildDir}/dependencies"
+        def utilZip = file("${depFolder}/ntcore.zip")
+        outputs.file(utilZip)
+        def ntCore
+
+        doFirst {
+            def ntCoreDependency
+            def classifier
+            if (buildType == "windows") {
+              classifier = "windows2015"
+            } else {
+              classifier = buildType
+            }
+            ntCoreDependency = project.dependencies.create("edu.wpi.first.wpilib.networktables.cpp:NetworkTables:+:${classifier}@zip")            
+            def ntCoreConfig = project.configurations.detachedConfiguration(ntCoreDependency)
+            ntCoreConfig.setTransitive(false)
+            ntCore = ntCoreConfig.files[0].canonicalFile
+        }
+
+        doLast {
+            copy {
+                from ntCore
+                rename 'NetworkTables(.+)', 'ntcore.zip'
+                into depFolder
+            }
+        }
+    }
+
+    def ntCoreUnzipLocation = "${project.buildDir}/ntcore"
+
+    // Create a task that will unzip the ntcore files into a temporary build directory
+    project.tasks.create(name: "unzipNtCore", type: Copy) {
+        description = 'Unzips the ntcore maven dependency so that the include files and libraries can be used'
+        group = 'WPILib'
+        dependsOn project.tasks.downloadNtCore
+        from zipTree(project.tasks.downloadNtCore.outputs.files.singleFile)
+        into ntCoreUnzipLocation
+    }
+
+    project.ext.ntCore = ntCoreUnzipLocation
+    project.ext.ntCoreInclude = "$ntCoreUnzipLocation/include"
+
+    project.ext.addNtCoreLibraryLinks = { compileTask, linker, targetPlatform ->
+        compileTask.dependsOn project.tasks.unzipNtCore
+        String path = project.getPlatformPath2(targetPlatform)
+        if (targetPlatform.operatingSystem.windows) {
+            linker.args "${project.ntCore}/${path}/ntcore.lib"
+        } else {
+            linker.args "${project.ntCore}/${path}/libntcore.a"
+        }
+    }
+}
+
+ext.useCsCore = { project ->
+    project.tasks.create(name: "downloadCsCore") {
+        description = 'Downloads the cscore maven dependency.'
+        group = 'WPILib'
+        def depFolder = "${project.buildDir}/dependencies"
+        def cszip = file("${depFolder}/cscore.zip")
+        outputs.file(cszip)
+        def cscore
+
+        doFirst {
+            def csCoreDependency
+            def classifier
+            if (buildType == "windows") {
+              classifier = "windows2015"
+            } else {
+              classifier = buildType
+            }
+            csCoreDependency = project.dependencies.create("edu.wpi.cscore.cpp:cscore:+:${classifier}@zip")            
+            def csCoreConfig = project.configurations.detachedConfiguration(csCoreDependency)
+            csCoreConfig.setTransitive(false)
+            cscore = csCoreConfig.files[0].canonicalFile
+        }
+
+        doLast {
+            copy {
+                from cscore
+                rename 'cscore(.+)', 'cscore.zip'
+                into depFolder
+            }
+        }
+    }
+
+    def csCoreUnzipLocation = "${project.buildDir}/cscore"
+
+    // Create a task that will unzip the cscore files into a temporary build directory
+    project.tasks.create(name: "unzipCsCore", type: Copy) {
+        description = 'Unzips the cscore maven dependency so that the include files and libraries can be used'
+        group = 'WPILib'
+        dependsOn project.tasks.downloadCsCore
+        from zipTree(project.tasks.downloadCsCore.outputs.files.singleFile)
+        into csCoreUnzipLocation
+    }
+
+    project.ext.csCore = csCoreUnzipLocation
+    project.ext.csCoreInclude = "$csCoreUnzipLocation/include"
+
+    project.ext.addCsCoreLibraryLinks = { compileTask, linker, targetPlatform ->
+        compileTask.dependsOn project.tasks.unzipCsCore
+        String path = project.getPlatformPath2(targetPlatform)
+        if (targetPlatform.operatingSystem.windows) {
+            linker.args "${project.csCore}/${path}/cscore.lib"
+        } else {
+            linker.args "${project.csCore}/${path}/libcscore.a"
+        }
+    }
+}
+
+ext.getOpenCvPlatformPackage = { targetPlatform ->
+    if (buildType == "armhf") {
+      return "linux-armhf"
+    } else if (buildType == "arm-raspbian") {
+      return "linux-arm-raspbian"
+    } else if (targetPlatform.architecture.arm && project.hasProperty('compilerPrefix') && project.hasProperty('armSuffix')) {
+        return "linux-arm${project.armSuffix}"
+    } else if (targetPlatform.architecture.arm) {
+        return 'linux-arm'
+    } else if (targetPlatform.operatingSystem.linux) {
+        if (targetPlatform.architecture.amd64) {
+            return 'linux-x86_64'
+        } else {
+            return 'linux-' + targetPlatform.architecture.name
+        }
+    } else if (targetPlatform.operatingSystem.windows) {
+        if (targetPlatform.architecture.amd64) {
+            return 'windows-x86_64_2015'
+        } else {
+            return 'windows-' + targetPlatform.architecture.name + '_2015'
+        }
+    } else if (targetPlatform.operatingSystem.macOsX) {
+        if (targetPlatform.architecture.amd64) {
+            return 'osx-x86_64'
+        } else {
+            return 'osx-' + targetPlatform.architecture.name
+        }
+    } else {
+        return targetPlatform.operatingSystem.name + '-' + targetPlatform.architecture.name
+    }
+}
+
+task downloadOpenCvHeaders() {
+    description = 'Downloads the OpenCV Headers maven dependency.'
+    group = 'WPILib'
+    def depFolder = "${buildDir}/dependencies"
+    def openCvHeadersZip = file("${depFolder}/opencv-headers.zip")
+    outputs.file(openCvHeadersZip)
+    def openCvHeaders
+
+    doFirst {
+        def openCvHeadersDependency = project.dependencies.create("org.opencv:opencv-headers:3.1.0@jar")
+        def openCvHeadersConfig = project.configurations.detachedConfiguration(openCvHeadersDependency)
+        openCvHeadersConfig.setTransitive(false)
+        openCvHeaders = openCvHeadersConfig.files[0].canonicalFile
+    }
+
+    doLast {
+        copy {
+            from openCvHeaders
+            rename 'opencv-headers(.+)', 'opencv-headers.zip'
+            into depFolder
+        }
+    }
+}
+
+ext.useOpenCv = { project ->
+    def openCvUnzipLocation = "${project.buildDir}/opencv"
+
+    project.tasks.create(name: "unzipOpenCvHeaders", type: Copy) {
+        description = 'Unzips the OpenCV maven dependency so that the include files and libraries can be used'
+        group = 'OpenCv'
+        dependsOn downloadOpenCvHeaders
+        from zipTree(downloadOpenCvHeaders.outputs.files.singleFile)
+        into "${openCvUnzipLocation}/include"
+    }
+
+    project.ext.openCv = openCvUnzipLocation
+    project.ext.openCvInclude = "$openCvUnzipLocation/include"
+
+    project.ext.addOpenCvLibraryLinks = { compileTask, linker, targetPlatform ->
+        def openCvPlatform = project.getOpenCvPlatformPackage(targetPlatform)
+        def openCvNativesFolder = "${project.openCv}/${openCvPlatform}"
+
+        if (project.tasks.findByPath("unzipOpenCvNatives_${openCvPlatform}") == null) {
+            project.tasks.create(name: "downloadOpenCvNatives_${openCvPlatform}") {
+                description = 'Downloads the OpenCV natives maven dependency.'
+                group = 'OpenCv'
+                def depFolder = "${project.buildDir}/dependencies"
+                def openCvNativesZip = file("${depFolder}/opencv-natives-${openCvPlatform}.zip")
+                outputs.file(openCvNativesZip)
+                def openCvNatives
+
+                doFirst {
+                    def openCvNativesDependency = project.dependencies.create("org.opencv:opencv-natives:3.1.0:${openCvPlatform}@jar")
+                    def openCvNativesConfig = project.configurations.detachedConfiguration(openCvNativesDependency)
+                    openCvNativesConfig.setTransitive(false)
+                    openCvNatives = openCvNativesConfig.files[0].canonicalFile
+                }
+
+                doLast {
+                    copy {
+                        from openCvNatives
+                        rename 'opencv-natives(.+)', "opencv-natives-${openCvPlatform}.zip"
+                        into depFolder
+                    }
+                }
+            }
+
+            project.tasks.create(name: "unzipOpenCvNatives_${openCvPlatform}", type: Copy) {
+                description = 'Unzips the OpenCV maven dependency so that the include files and libraries can be used'
+                group = 'OpenCv'
+                dependsOn "downloadOpenCvNatives_${openCvPlatform}"
+                from zipTree(project.tasks["downloadOpenCvNatives_${openCvPlatform}"].outputs.files.singleFile)
+                into openCvNativesFolder
+                exclude '**/MANIFEST.MF'
+            }
+        }
+
+        compileTask.dependsOn "unzipOpenCvHeaders", "unzipOpenCvNatives_${openCvPlatform}"
+        if (targetPlatform.operatingSystem.windows) {
+            linker.args new String("${openCvNativesFolder}\\opencv.lib").replace('/', '\\')
+            linker.args new String("${openCvNativesFolder}\\Release\\libjpeg.lib").replace('/', '\\')
+            linker.args new String("${openCvNativesFolder}\\Release\\libpng.lib").replace('/', '\\')
+            linker.args new String("${openCvNativesFolder}\\Release\\zlib.lib").replace('/', '\\')
+            linker.args "kernel32.lib"
+            linker.args "user32.lib"
+            linker.args "gdi32.lib"
+            linker.args "Ole32.lib"
+            linker.args "OleAut32.lib"
+            linker.args "comdlg32.lib"
+            linker.args "advapi32.lib"
+            linker.args "Vfw32.lib"
+        } else {
+            linker.args "-L${openCvNativesFolder}"
+            linker.args "-lopencv"
+            linker.args "-ldl"
+        }
+    }
+}

@@ -9,7 +9,7 @@ apply plugin: 'application'
 
 // This is where you select which operating system to build for.
 // Uncomment the line below to build for windows
-//ext.buildType = "windows"
+ext.buildType = "windows"
 // Uncomment the line below to build for a Raspberry Pi running raspbian
 //ext.buildType = "arm-raspbian"
 // Uncomment the line below to build for an armhf device such as a Jetson or a Beaglebone Black
@@ -25,7 +25,7 @@ repositories {
     mavenCentral()
     maven {
       url "http://first.wpi.edu/FRC/roborio/maven/release"
-      url "${System.getProperty('user.home')}/releases/maven/development"
+      url "${System.getProperty('user.home')}/releases/maven/release"
     }
 }
 
