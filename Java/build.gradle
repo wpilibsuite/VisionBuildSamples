@@ -11,7 +11,7 @@ apply plugin: 'application'
 // Uncomment the line below to build for windows
 //ext.buildType = "windows"
 // Uncomment the line below to build for a Raspberry Pi running raspbian
-ext.buildType = "arm-raspbian"
+//ext.buildType = "arm-raspbian"
 // Uncomment the line below to build for an armhf device such as a Jetson or a Beaglebone Black
 //ext.buildType = "armhf"
 
@@ -57,21 +57,60 @@ distributions {
   }
 }
 
-def outputDir = file("${rootDir}/output")
+def outputDirectory = file("${rootDir}/output")
+
+task writeExecuteScript() {
+  dependsOn jar
+  doLast {
+    if (buildType == "windows") {
+      def runFile = new File("${buildDir}/run${projectName}.bat")
+      runFile.write "java -Djava.library.path=. -jar ${projectName}-all.jar"
+    } else {
+      def runFile = new File("${buildDir}/run${projectName}")
+      runFile.write "java -Djava.library.path=. -jar ${projectName}-all.jar"
+    }
+  }
+}
 
 task copyToOutput(type: Copy) {
   dependsOn shadowJar
   dependsOn unzipOpenCv
-  dependsOn distZip
-  destinationDir = outputDir
+  dependsOn writeExecuteScript
+  destinationDir = outputDirectory
   from (file(shadowJar.archivePath)) {
-  }
-  from (distZip) {
-
   }
   from (openCvUnzipLocation) {
     exclude 'META-INF'
     exclude '**/MANIFEST.MF'
+  }
+  if (buildType == "windows") {
+    from (file("${buildDir}/run${projectName}.bat")) {
+    }
+  } else {
+    from (file("${buildDir}/run${projectName}")) {
+    }
+  }
+}
+
+task zipOutput(type: Zip) {
+  baseName = projectName
+  duplicatesStrategy = 'exclude'
+  dependsOn shadowJar
+  dependsOn unzipOpenCv
+  destinationDir = outputDirectory
+  from (file(shadowJar.archivePath)) {
+  }
+  from (openCvUnzipLocation) {
+    exclude 'META-INF'
+    exclude '**/MANIFEST.MF'
+  }
+  if (buildType == "windows") {
+    from (file("${buildDir}/run${projectName}.bat")) {
+    }
+  } else {
+    from (file("${buildDir}/run${projectName}")) {
+      fileMode 0777
+    }
   }
 }
 
@@ -80,10 +119,10 @@ distTar.dependsOn unzipOpenCv
 
 applicationDefaultJvmArgs = ["-Djava.library.path=${openCvUnzipLocation}"]
 
-build.dependsOn shadowJar
 build.dependsOn copyToOutput
+build.dependsOn zipOutput
 run.dependsOn unzipOpenCv
 
 clean {
-    delete outputDir
+    delete outputDirectory
 }
