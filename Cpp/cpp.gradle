@@ -7,7 +7,9 @@ def appSetupModel = { project ->
                 if (project.isArm) {
                     targetPlatform 'arm'
                 } else {
-                    targetPlatform 'x86'
+                    if (buildType == "windows") {
+                        targetPlatform 'x86'
+                    }
                     targetPlatform 'x64'
                 }
                 setupDefines(project, binaries)
