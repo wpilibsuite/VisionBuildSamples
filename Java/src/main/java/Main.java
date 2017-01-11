@@ -26,7 +26,7 @@ public class Main {
     // This stores our reference to our mjpeg server for streaming the input image
     MjpegServer inputStream = new MjpegServer("MJPEG Server", streamPort);
 
-
+    // Selecting a Camera
     // Uncomment one of the 2 following camera options
     // The top one receives a stream from another device, and performs operations based on that
     // On windows, this one must be used since USB is not supported
