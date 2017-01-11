@@ -2,6 +2,8 @@
 // Uncomment the line below to build for windows
 //ext.buildType = "windows"
 
+//ext.buildType = "linux"
+
 // Uncomment the 4 lines below starting with ext. to cross compile for a Raspberry Pi running raspbian.
 ext.buildType = "arm-raspbian" // Do not change this string
 ext.compilerPrefix = "arm-linux-gnueabihf-" // Should not have to change this string, see readme for more
@@ -14,10 +16,10 @@ ext.armSuffix = "-raspbian" // Do not change this string
 //ext.armSuffix = "hf" // Do not change this string
 //ext.toolChainPath = "CHANGE_ME_PATH_TO_COMPILER_HERE" // See Readme to see what this needs to be specified to
 
-// Uncomment the 3 lines below starting with ext. to natively build for a Raspberry Pi running raspbian. Use this if you are building on th Pi itself
-//ext.buildType = "armhf"
+// Uncomment the 3 lines below starting with ext. to natively build for a Raspberry Pi running raspbian. Use this if you are building on the Pi itself
+//ext.buildType = "arm-raspbian"
 //ext.compilerPrefix = ""
-//ext.armSuffix = "hf"
+//ext.armSuffix = "-raspbian"
 
 // Uncomment the 3 lines below starting with ext. to natively build for an armhf device such as a Jetson or a Beaglebone Black. Use this if you are building on the device itself
 //ext.buildType = "armhf"
