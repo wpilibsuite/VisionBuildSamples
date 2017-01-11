@@ -100,7 +100,7 @@ task copyToOutput(type: Copy) {
             binaries {
                 withType(NativeExecutableBinarySpec) { binary ->
                     from(binary.executableFile) {
-                      if (targetPlatform.operatingSystem.windows) {
+                      if (targetPlatform.operatingSystem.windows || targetPlatform.operatingSystem.linux) {
                           if (targetPlatform.architecture.amd64) {
                               into '64bit'
                           } else {
