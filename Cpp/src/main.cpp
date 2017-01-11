@@ -9,8 +9,8 @@
 #include <string>
 #include <chrono>
 
-static cs::VideoCamera SetHttpCamera(llvm::StringRef cameraName, cs::MjpegServer& server);
-static cs::UsbCamera SetUsbCamera(int cameraId, cs::MjpegServer& server);
+cs::VideoCamera SetHttpCamera(llvm::StringRef cameraName, cs::MjpegServer& server);
+cs::UsbCamera SetUsbCamera(int cameraId, cs::MjpegServer& server);
 
 int main() {
   // Connect NetworkTables, and get access to the publishing table
@@ -48,20 +48,19 @@ int main() {
   }
   */
   
-  
-    
+
 
   /***********************************************/
 
   // USB Camera
-  /*
+  
   // This gets the image from a USB camera 
   // Usually this will be on device 0, but there are other overloads
   // that can be used
   cs::UsbCamera camera = SetUsbCamera(0, inputStream);
   // Set the resolution for our camera, since this is over USB
   camera.SetResolution(640,480);
-  */
+  
 
   // This creates a CvSink for us to use. This grabs images from our selected camera, 
   // and will allow us to use those images in opencv
@@ -97,7 +96,7 @@ int main() {
   }
 }
 
-static cs::VideoCamera SetHttpCamera(llvm::StringRef cameraName, cs::MjpegServer& server) {
+cs::VideoCamera SetHttpCamera(llvm::StringRef cameraName, cs::MjpegServer& server) {
   // Start by grabbing the camera from NetworkTables
   auto publishingTable = NetworkTable::GetTable("CameraPublisher");
   // Wait for robot to connect. Allow this to be attempted indefinitely
@@ -129,7 +128,7 @@ static cs::VideoCamera SetHttpCamera(llvm::StringRef cameraName, cs::MjpegServer
   return camera;
 } 
 
-static cs::UsbCamera SetUsbCamera(int cameraId, cs::MjpegServer& server) {
+cs::UsbCamera SetUsbCamera(int cameraId, cs::MjpegServer& server) {
   cs::UsbCamera camera("CoprocessorCamera", cameraId);
   server.SetSource(camera);
   return camera;
