@@ -12,9 +12,6 @@ apply plugin: 'application'
 // Uncomment the line below to build for windows
 //ext.buildType = "windows"
 
-// Uncomment the line below to build for linux desktop platforms
-ext.buildType = "linux"
-
 // Uncomment the line below to build for a Raspberry Pi running raspbian
 //ext.buildType = "arm-raspbian"
 
