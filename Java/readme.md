@@ -1,12 +1,12 @@
 # Java sample vision system
 
-This is the WPILib sample build system for building Java based vision targeting for running on systems other then the roboRIO. This currently supports the following platfomrs
+This is the WPILib sample build system for building Java based vision targeting for running on systems other than the roboRIO. This currently supports the following platforms
 
 * Windows
 * Raspberry Pi running Raspbian
 * Generic Armhf devices (such as the BeagleBone Black or the Jetson)
 
-It has been designed to be easy to set up and use, and only needs a few minor settings to pick which system you want to be ran on. It has samples for interfacing with NetworkTables and CsCore from
+It has been designed to be easy to setup and use, and only needs a few minor settings to pick which system you want to be ran on. It has samples for interfacing with NetworkTables and CsCore from
 any device, along with performing OpenCV operations.
 
 ## Choosing which system to build for
@@ -37,7 +37,7 @@ this file to the system, extract it, then run the .bat or shell script to run yo
 This sample gets an image either from a USB camera or an already existing stream. It then restreams the input image in it's raw form in order to make it viewable on another system.
 It then creates an OpenCV sink from the camera, which allows us to grab OpenCV images. It then creates an output stream for an OpenCV image, for instance so you can stream an annotated
 image. The default sample just performs a color conversion from BGR to HSV, however from there it is easy to create your own OpenCV processing in order to run everything. In addition, it is possible
-to run a pipeline generated from GRIP. 
+to run a pipeline generated from GRIP. In addition, a connection to NetworkTables is set up, so you can send data regarding the targets back to your robot.
 
 ## Other configuration options
 The build script provides a few other configuration options. These include selecting the main class name, and providing an output name for the project.
