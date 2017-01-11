@@ -12,6 +12,8 @@ ext.useWpiUtil = { project ->
             def classifier
             if (buildType == "windows") {
               classifier = "windows2015"
+            } else if (buildType == "linux") {
+              classifier = "desktop"
             } else {
               classifier = buildType
             }
@@ -128,8 +130,6 @@ ext.useCsCore = { project ->
             def classifier
             if (buildType == "windows") {
               classifier = "windows2015"
-            } else if (buildType == "linux") {
-              classifier = "desktop"
             } else {
               classifier = buildType
             }

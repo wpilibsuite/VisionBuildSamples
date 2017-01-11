@@ -1,13 +1,13 @@
 // This is where you select which operating system to build for.
 // Uncomment the line below to build for windows
-//ext.buildType = "windows"
+ext.buildType = "windows"
 
 //ext.buildType = "linux"
 
 // Uncomment the 4 lines below starting with ext. to cross compile for a Raspberry Pi running raspbian.
-ext.buildType = "arm-raspbian" // Do not change this string
-ext.compilerPrefix = "arm-linux-gnueabihf-" // Should not have to change this string, see readme for more
-ext.armSuffix = "-raspbian" // Do not change this string
+//ext.buildType = "arm-raspbian" // Do not change this string
+//ext.compilerPrefix = "arm-linux-gnueabihf-" // Should not have to change this string, see readme for more
+//ext.armSuffix = "-raspbian" // Do not change this string
 //ext.toolChainPath = "CHANGE_ME_PATH_TO_COMPILER_HERE"
 
 // Uncomment the 4 lines below starting with ext. to cross compile for an armhf device such as a Jetson or a Beaglebone Black

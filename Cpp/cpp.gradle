@@ -32,7 +32,7 @@ def appSetupModel = { project ->
 
 apply plugin: 'cpp'
 
-if (buildType == "windows") {
+if (buildType == "windows" || buildType == "linux") {
   apply from: "${rootDir}/toolchains/native.gradle"
 } else {
   apply from: "${rootDir}/toolchains/arm.gradle"

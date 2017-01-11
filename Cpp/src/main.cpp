@@ -10,6 +10,9 @@
 #include <chrono>
 
 cs::VideoCamera SetHttpCamera(llvm::StringRef cameraName, cs::MjpegServer& server);
+#ifdef _WIN32
+static
+#endif
 cs::UsbCamera SetUsbCamera(int cameraId, cs::MjpegServer& server);
 
 int main() {
@@ -34,7 +37,7 @@ int main() {
   // the input image so other devices can see it.
 
   // HTTP Camera
-  /*
+  
   // This is our camera name from the robot. this can be set in your robot code with the following command
   // CameraServer.getInstance().startAutomaticCapture("YourCameraNameHere");
   // "USB Camera 0" is the default if no string is specified
@@ -46,21 +49,21 @@ int main() {
     camera = cs::HttpCamera{"CoprocessorCamera", "YourURLHere"};
     inputStream.SetSource(camera);
   }
-  */
+  
   
 
 
   /***********************************************/
 
   // USB Camera
-  
+  /*
   // This gets the image from a USB camera 
   // Usually this will be on device 0, but there are other overloads
   // that can be used
   cs::UsbCamera camera = SetUsbCamera(0, inputStream);
   // Set the resolution for our camera, since this is over USB
   camera.SetResolution(640,480);
-  
+  */
 
   // This creates a CvSink for us to use. This grabs images from our selected camera, 
   // and will allow us to use those images in opencv
@@ -104,8 +107,7 @@ cs::VideoCamera SetHttpCamera(llvm::StringRef cameraName, cs::MjpegServer& serve
     if (publishingTable->GetSubTables().size() > 0) {
       break;
     }
-    using namespace std::chrono_literals;
-    std::this_thread::sleep_for(500ms);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }
 
   if (!publishingTable->ContainsSubTable(cameraName)) {
@@ -128,6 +130,9 @@ cs::VideoCamera SetHttpCamera(llvm::StringRef cameraName, cs::MjpegServer& serve
   return camera;
 } 
 
+#ifdef _WIN32
+static
+#endif
 cs::UsbCamera SetUsbCamera(int cameraId, cs::MjpegServer& server) {
   cs::UsbCamera camera("CoprocessorCamera", cameraId);
   server.SetSource(camera);
