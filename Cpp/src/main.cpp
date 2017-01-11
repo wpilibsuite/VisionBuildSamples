@@ -1,3 +1,6 @@
+// Workaround for working with GCC 5.4. Do not remove
+#define _GLIBCXX_USE_CXX11_ABI 0
+
 #include "cscore.h"
 #include "networktables/NetworkTable.h"
 #include "tables/ITable.h"
@@ -10,9 +13,7 @@
 #include <chrono>
 
 cs::VideoCamera SetHttpCamera(llvm::StringRef cameraName, cs::MjpegServer& server);
-#ifdef _WIN32
-static
-#endif
+
 cs::UsbCamera SetUsbCamera(int cameraId, cs::MjpegServer& server);
 
 int main() {
@@ -37,7 +38,7 @@ int main() {
   // the input image so other devices can see it.
 
   // HTTP Camera
-  
+  /*
   // This is our camera name from the robot. this can be set in your robot code with the following command
   // CameraServer.getInstance().startAutomaticCapture("YourCameraNameHere");
   // "USB Camera 0" is the default if no string is specified
@@ -49,7 +50,7 @@ int main() {
     camera = cs::HttpCamera{"CoprocessorCamera", "YourURLHere"};
     inputStream.SetSource(camera);
   }
-  
+  */
   
 
 
@@ -130,11 +131,13 @@ cs::VideoCamera SetHttpCamera(llvm::StringRef cameraName, cs::MjpegServer& serve
   return camera;
 } 
 
-#ifdef _WIN32
-static
-#endif
 cs::UsbCamera SetUsbCamera(int cameraId, cs::MjpegServer& server) {
+#ifdef _WIN32
+  // On windows, return empty because this doesn't work
+  throw std::exception("Cannot use USB cameras on windows");
+#else
   cs::UsbCamera camera("CoprocessorCamera", cameraId);
   server.SetSource(camera);
   return camera;
+#endif
 }

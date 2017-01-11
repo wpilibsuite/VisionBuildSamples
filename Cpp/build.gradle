@@ -2,6 +2,9 @@
 // Uncomment the line below to build for windows
 ext.buildType = "windows"
 
+// Uncomment the line below to build for linux
+//ext.buildType = "linux"
+
 // Uncomment the 4 lines below starting with ext. to cross compile for a Raspberry Pi running raspbian.
 //ext.buildType = "arm-raspbian" // Do not change this string
 //ext.compilerPrefix = "arm-linux-gnueabihf-" // Should not have to change this string, see readme for more
@@ -98,7 +101,6 @@ task copyToOutput(type: Copy) {
                 withType(NativeExecutableBinarySpec) { binary ->
                     from(binary.executableFile) {
                       if (targetPlatform.operatingSystem.windows) {
-                          println targetPlatform.architecture.amd64
                           if (targetPlatform.architecture.amd64) {
                               into '64bit'
                           } else {
