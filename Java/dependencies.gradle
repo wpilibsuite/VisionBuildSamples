@@ -2,6 +2,8 @@ ext.ntcoreDep = { ->
     def classifier
     if (buildType == "windows") {
       classifier = "windows2015"
+    } else if (buildType == "linux") {
+      classifier = "desktop"
     } else {
       classifier = buildType
     }
@@ -18,6 +20,28 @@ ext.cscoreDep = { ->
     return "edu.wpi.cscore.java:cscore:+:$classifier"
 }
 
+ext.getOpenCvPlatformPackage = { ->
+  if (buildType == "windows") {
+    if (System.getProperty("os.arch") == "amd64") {
+      return "windows-x86_64_2015"
+    } else {
+      return "windows-x86_2015"
+    }
+  } else if (buildType == "linux") {
+    if (System.getProperty("os.arch") == "amd64") {
+      return "linux-x86_64"
+    } else {
+      return "linux-x86"
+    }
+  } else if (buildType == "armhf") {
+    return "linux-armhf"
+  } else if (buildType == "arm-raspbian") {
+    return "linux-arm-raspbian"
+  } else {
+    return buildType
+  }
+}
+
 task downloadOpenCv() {
     description = 'Downloads the OpenCV Native maven dependency.'
     group = 'WPILib'
@@ -27,20 +51,7 @@ task downloadOpenCv() {
     def armOpenCv
 
     doFirst {
-        def classifier
-        if (buildType == "windows") {
-          if (System.getProperty("os.arch") == "amd64") {
-            classifier = "windows-x86_64_2015"
-          } else {
-            classifier = "windows-x86_2015"
-          }
-        } else if (buildType == "armhf") {
-          classifier = "linux-armhf"
-        } else if (buildType == "arm-raspbian") {
-          classifier = "linux-arm-raspbian"
-        } else {
-          classifier = buildType
-        }
+        def classifier = getOpenCvPlatformPackage()
         def armOpenCvDependency = project.dependencies.create("org.opencv:opencv-jni:+:$classifier@jar")
         def armOpenCvConfig = project.configurations.detachedConfiguration(armOpenCvDependency)
         armOpenCvConfig.setTransitive(false)

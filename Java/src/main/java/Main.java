@@ -34,7 +34,6 @@ public class Main {
     // the input image so other devices can see it.
 
     // HTTP Camera
-    /*
     // This is our camera name from the robot. this can be set in your robot code with the following command
     // CameraServer.getInstance().startAutomaticCapture("YourCameraNameHere");
     // "USB Camera 0" is the default if no string is specified
@@ -47,7 +46,6 @@ public class Main {
       camera = new HttpCamera("CoprocessorCamera", "YourURLHere");
       inputStream.setSource(camera);
     }
-    */
     
       
 

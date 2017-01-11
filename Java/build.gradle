@@ -8,10 +8,16 @@ apply plugin: 'application'
 
 
 // This is where you select which operating system to build for.
+
 // Uncomment the line below to build for windows
 //ext.buildType = "windows"
+
+// Uncomment the line below to build for linux desktop platforms
+ext.buildType = "linux"
+
 // Uncomment the line below to build for a Raspberry Pi running raspbian
 //ext.buildType = "arm-raspbian"
+
 // Uncomment the line below to build for an armhf device such as a Jetson or a Beaglebone Black
 //ext.buildType = "armhf"
 

@@ -29,8 +29,6 @@ ext.buildType = "windows"
 ext.use32Bit = false
 
 
-
-
 // Shouldn't need to change anything below this point
 ext.getPlatformPath2 = { targetPlatform ->
     if (targetPlatform.architecture.arm) {
