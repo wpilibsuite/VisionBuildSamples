@@ -6,6 +6,8 @@ import edu.wpi.cscore.*;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.Collections;
+
 public class Main {
   public static void main(String[] args) {
     // Loads our OpenCV library. This MUST be included
@@ -48,28 +50,29 @@ public class Main {
       inputStream.setSource(camera);
     }
     */
-    
-      
+
+
 
     /***********************************************/
 
     // USB Camera
     /*
-    // This gets the image from a USB camera 
+    // This gets the image from a USB camera
     // Usually this will be on device 0, but there are other overloads
     // that can be used
+
+    */
     UsbCamera camera = setUsbCamera(0, inputStream);
     // Set the resolution for our camera, since this is over USB
     camera.setResolution(640,480);
-    */
 
-    // This creates a CvSink for us to use. This grabs images from our selected camera, 
+    // This creates a CvSink for us to use. This grabs images from our selected camera,
     // and will allow us to use those images in opencv
     CvSink imageSink = new CvSink("CV Image Grabber");
     imageSink.setSource(camera);
 
     // This creates a CvSource to use. This will take in a Mat image that has had OpenCV operations
-    // operations 
+    // operations
     CvSource imageSource = new CvSource("CV Image Source", VideoMode.PixelFormat.kMJPEG, 640, 480, 30);
     MjpegServer cvStream = new MjpegServer("CV Image Stream", 1186);
     cvStream.setSource(imageSource);
@@ -90,11 +93,69 @@ public class Main {
       // The sample below just changes color source to HSV
       Imgproc.cvtColor(inputImage, hsv, Imgproc.COLOR_BGR2HSV);
 
+      GripPipeline pipeline = new GripPipeline();
+
+      pipeline.process(inputImage);
+
+      ArrayList<MatOfPoint> contours = filterContoursOutput();
+
+      ArrayList<MatOfPoint> tapeStrips = getTapeStrips(contours);
+
+      System.out.println(tapeStrips.get(0).toString());
+      System.out.println(tapeStrips.get(1).toString());
+
+
+
+
       // Here is where you would write a processed image that you want to restreams
       // This will most likely be a marked up image of what the camera sees
       // For now, we are just going to stream the HSV image
       imageSource.putFrame(hsv);
     }
+  }
+
+  private ArrayList<MatOfPoint> getTapeStrips(ArrayList<MatOfPoint> contours)) {
+    //expcted ration between width and height of tape
+    double expectedRatio = 2/5;
+
+    MatOfPoint tapeStrip1 = contours.get(0);
+    MatOfPoint tapeStrip2;
+
+    double tapeStrip1PercentError = getPercentError(tapeStrip1.width / tapeStrip1.height, expectedRatio);
+    double tapeStrip2PercentError;
+
+    for (MatOfPoint cont : contours) {
+      double ratio = cont.witdth / cont.height;
+      double percentError = getPercentError(ratio, expectedRatio);
+
+
+      if (percentError <= tapeStrip1PercentError) {
+        tapeStrip2 = tapeStrip1;
+        tapeStrip2PercentError = tapeStrip1PercentError;
+
+        tapeStrip1 = cont;
+        tapeStrip1PercentError = percentError;
+      }
+      else if (tapeStrip2 != null) {
+        if (percentError <= tapeStrip2PercentError) {
+          tapeStrip2 = cont;
+          tapeStrip2PercentError = percentError;
+        }
+      }
+    }
+
+    //returned arraylist that will contain the (presumed) 2 tape strips
+    ArrayList<MatOfPoint> returnList = new ArrayList<MatOfPoint>();
+
+    returnList.add(tapeStrip1);
+    returnList.add(tapeStrip2);
+
+    return returnList;
+
+  }
+
+  private double getPercentError(double experimentalVal, double expectedVal) {
+    return (Math.abs(expectedVal - experimantalVal)/(expectedVal));
   }
 
   private static HttpCamera setHttpCamera(String cameraName, MjpegServer server) {
@@ -135,7 +196,7 @@ public class Main {
   }
 
   private static UsbCamera setUsbCamera(int cameraId, MjpegServer server) {
-    // This gets the image from a USB camera 
+    // This gets the image from a USB camera
     // Usually this will be on device 0, but there are other overloads
     // that can be used
     UsbCamera camera = new UsbCamera("CoprocessorCamera", cameraId);
