@@ -116,18 +116,18 @@ public class Main {
     }
   }
 
-  private ArrayList<MatOfPoint> getTapeStrips(ArrayList<MatOfPoint> contours) {
-    //expcted ration between width and height of tape
+  private static ArrayList<MatOfPoint> getTapeStrips(ArrayList<MatOfPoint> contours) {
+    //expcted ration between width() and height() of tape
     double expectedRatio = 2/5;
 
     MatOfPoint tapeStrip1 = contours.get(0);
-    MatOfPoint tapeStrip2;
+    MatOfPoint tapeStrip2 = null;
 
-    double tapeStrip1PercentError = getPercentError(tapeStrip1.width / tapeStrip1.height, expectedRatio);
-    double tapeStrip2PercentError;
+    double tapeStrip1PercentError = getPercentError(tapeStrip1.width() / tapeStrip1.height(), expectedRatio);
+    double tapeStrip2PercentError = 255; //fair dice roll
 
     for (MatOfPoint cont : contours) {
-      double ratio = cont.witdth / cont.height;
+      double ratio = cont.width() / cont.height();
       double percentError = getPercentError(ratio, expectedRatio);
 
 
@@ -156,7 +156,7 @@ public class Main {
 
   }
 
-  private double getPercentError(double experimentalVal, double expectedVal) {
+  private static double getPercentError(double experimentalVal, double expectedVal) {
     return (Math.abs(expectedVal - experimentalVal)/(expectedVal));
   }
 
