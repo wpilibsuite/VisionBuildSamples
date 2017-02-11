@@ -103,8 +103,10 @@ public class Main {
 
       ArrayList<MatOfPoint> tapeStrips = getTapeStrips(contours);
 
-      System.out.println(tapeStrips.get(0).toString());
-      System.out.println(tapeStrips.get(1).toString());
+
+      for (MatOfPoint strip : tapeStrips) {
+        System.out.println(strip.toString());
+      }
 
 
 
@@ -120,37 +122,41 @@ public class Main {
     //expcted ration between width() and height() of tape
     double expectedRatio = 2/5;
 
-    MatOfPoint tapeStrip1 = contours.get(0);
-    MatOfPoint tapeStrip2 = null;
-
-    double tapeStrip1PercentError = getPercentError(tapeStrip1.width() / tapeStrip1.height(), expectedRatio);
-    double tapeStrip2PercentError = 255; //fair dice roll
-
-    for (MatOfPoint cont : contours) {
-      double ratio = cont.width() / cont.height();
-      double percentError = getPercentError(ratio, expectedRatio);
-
-
-      if (percentError <= tapeStrip1PercentError) {
-        tapeStrip2 = tapeStrip1;
-        tapeStrip2PercentError = tapeStrip1PercentError;
-
-        tapeStrip1 = cont;
-        tapeStrip1PercentError = percentError;
-      }
-      else if (tapeStrip2 != null) {
-        if (percentError <= tapeStrip2PercentError) {
-          tapeStrip2 = cont;
-          tapeStrip2PercentError = percentError;
-        }
-      }
-    }
-
     //returned arraylist that will contain the (presumed) 2 tape strips
     ArrayList<MatOfPoint> returnList = new ArrayList<MatOfPoint>();
 
-    returnList.add(tapeStrip1);
-    returnList.add(tapeStrip2);
+    if (contours.size() > 0) {
+
+      MatOfPoint tapeStrip1 = contours.get(0);
+      MatOfPoint tapeStrip2 = null;
+
+      double tapeStrip1PercentError = getPercentError(tapeStrip1.width() / tapeStrip1.height(), expectedRatio);
+      double tapeStrip2PercentError = 255; //fair dice roll
+
+      for (MatOfPoint cont : contours) {
+        double ratio = cont.width() / cont.height();
+        double percentError = getPercentError(ratio, expectedRatio);
+
+
+        if (percentError <= tapeStrip1PercentError) {
+          tapeStrip2 = tapeStrip1;
+          tapeStrip2PercentError = tapeStrip1PercentError;
+
+          tapeStrip1 = cont;
+          tapeStrip1PercentError = percentError;
+        }
+        else if (tapeStrip2 != null) {
+          if (percentError <= tapeStrip2PercentError) {
+            tapeStrip2 = cont;
+            tapeStrip2PercentError = percentError;
+          }
+        }
+      }
+
+      returnList.add(tapeStrip1);
+      returnList.add(tapeStrip2);
+
+    }
 
     return returnList;
 
