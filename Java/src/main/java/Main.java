@@ -6,6 +6,8 @@ import edu.wpi.cscore.*;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
+import org.opencv.core.MatOfPoint;
+
 import java.util.Collections;
 
 public class Main {
@@ -16,7 +18,7 @@ public class Main {
     // Connect NetworkTables, and get access to the publishing table
     NetworkTable.setClientMode();
     // Set your team number here
-    NetworkTable.setTeam(9999);
+    NetworkTable.setTeam(6624);
 
     NetworkTable.initialize();
 
@@ -97,7 +99,7 @@ public class Main {
 
       pipeline.process(inputImage);
 
-      ArrayList<MatOfPoint> contours = filterContoursOutput();
+      ArrayList<MatOfPoint> contours = pipeline.filterContoursOutput();
 
       ArrayList<MatOfPoint> tapeStrips = getTapeStrips(contours);
 
@@ -114,7 +116,7 @@ public class Main {
     }
   }
 
-  private ArrayList<MatOfPoint> getTapeStrips(ArrayList<MatOfPoint> contours)) {
+  private ArrayList<MatOfPoint> getTapeStrips(ArrayList<MatOfPoint> contours) {
     //expcted ration between width and height of tape
     double expectedRatio = 2/5;
 
