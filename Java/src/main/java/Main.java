@@ -157,7 +157,7 @@ public class Main {
   }
 
   private double getPercentError(double experimentalVal, double expectedVal) {
-    return (Math.abs(expectedVal - experimantalVal)/(expectedVal));
+    return (Math.abs(expectedVal - experimentalVal)/(expectedVal));
   }
 
   private static HttpCamera setHttpCamera(String cameraName, MjpegServer server) {
