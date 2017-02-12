@@ -103,9 +103,10 @@ public class Main {
 
       ArrayList<MatOfPoint> tapeStrips = getTapeStrips(contours);
 
-
-      for (MatOfPoint strip : tapeStrips) {
-        System.out.println(strip.toString());
+      if (tapeStrips.size() > 1) {
+        for (MatOfPoint strip : tapeStrips) {
+          System.out.println(strip.toString());
+        }
       }
 
 
