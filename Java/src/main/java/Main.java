@@ -106,7 +106,7 @@ public class Main {
       if (tapeStrips.size() > 1) {
         for (MatOfPoint strip : tapeStrips) {
           if (strip != null)
-            System.out.println("Width: "strip.width() + ", Height: ", + strip.height();
+            System.out.println("Width: " + strip.width() + ", Height: " + strip.height());
         }
       }
 
