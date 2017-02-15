@@ -93,7 +93,9 @@ public class Main {
 
       // Below is where you would do your OpenCV operations on the provided image
       // The sample below just changes color source to HSV
-      Imgproc.cvtColor(inputImage, hsv, Imgproc.COLOR_BGR2HSV);
+      //Imgproc.cvtColor(inputImage, hsv, Imgproc.COLOR_BGR2HSV);
+
+      Mat outputImage = inputImage;
 
       GripPipeline pipeline = new GripPipeline();
 
@@ -113,12 +115,8 @@ public class Main {
       System.out.println("------------------------------------------");
 
 
-
-
-      // Here is where you would write a processed image that you want to restreams
-      // This will most likely be a marked up image of what the camera sees
-      // For now, we are just going to stream the HSV image
-      imageSource.putFrame(hsv);
+      //output stream
+      imageSource.putFrame(outputImage);
     }
   }
 
