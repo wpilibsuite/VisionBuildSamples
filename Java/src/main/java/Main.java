@@ -5,6 +5,9 @@ import edu.wpi.first.wpilibj.tables.*;
 import edu.wpi.cscore.*;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.core.Rect;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 
 import org.opencv.core.MatOfPoint;
 
@@ -101,42 +104,54 @@ public class Main {
 
       pipeline.process(inputImage);
 
-      ArrayList<MatOfPoint> contours = pipeline.filterContoursOutput();
+      ArrayList<Rect> contourRectangles = convertContoursToRects( pipeline.filterContoursOutput() );
 
-      ArrayList<MatOfPoint> tapeStrips = getTapeStrips(contours);
+      ArrayList<Rect> tapeStrips = getTapeStrips(contours);
 
-      if (tapeStrips.size() > 1) {
-        for (MatOfPoint strip : tapeStrips) {
-          if (strip != null)
-            System.out.println("Width: " + strip.width() + ", Height: " + strip.height());
+      for (MatOfPoint strip : tapeStrips) {
+        if (strip != null) {
+          //print out rectangles
+          System.out.println("Width: " + strip.width + ", Height: " + strip.height;
+
+          //output rects to image source
+          Imgproc.rectangle(outputImage, new Point(strip.x, strip.y), new Point(strip.x + strip.width, strip.y + strip.height), new Scalar(255, 0, 0));
         }
       }
 
       System.out.println("------------------------------------------");
-
 
       //output stream
       imageSource.putFrame(outputImage);
     }
   }
 
-  private static ArrayList<MatOfPoint> getTapeStrips(ArrayList<MatOfPoint> contours) {
-    //expcted ration between width() and height() of tape
+  private static ArrayList<Rect> convertContoursToRects(ArrayList<MatOfPoint> contours) {
+    ArratyList<Rect> rectangles = new ArratyList<Rect>();
+
+    for (MatOfPoint contour : contours) {
+      rectangles.add( Imgproc.boundingRect( contour ) );
+    }
+
+    return rectangles;
+  }
+
+  private static ArrayList<Rect> getTapeStrips(ArrayList<Rect> rects) {
+    //expcted ration between width and height of tape
     double expectedRatio = 2/5;
 
     //returned arraylist that will contain the (presumed) 2 tape strips
-    ArrayList<MatOfPoint> returnList = new ArrayList<MatOfPoint>();
+    ArrayList<Rect> returnList = new ArrayList<Rect>();
 
-    if (contours.size() > 0) {
+    if (rects.size() > 0) {
 
-      MatOfPoint tapeStrip1 = contours.get(0);
-      MatOfPoint tapeStrip2 = null;
+      Rect tapeStrip1 = contours.get(0);
+      Rect tapeStrip2 = null;
 
-      double tapeStrip1PercentError = getPercentError(tapeStrip1.width() / tapeStrip1.height(), expectedRatio);
+      double tapeStrip1PercentError = getPercentError(tapeStrip1.width / tapeStrip1.height, expectedRatio);
       double tapeStrip2PercentError = 255; //fair dice roll
 
-      for (MatOfPoint cont : contours) {
-        double ratio = cont.width() / cont.height();
+      for (MatOfPoint rect : rects) {
+        double ratio = rect.width / rect.height;
         double percentError = getPercentError(ratio, expectedRatio);
 
 
@@ -144,14 +159,18 @@ public class Main {
           tapeStrip2 = tapeStrip1;
           tapeStrip2PercentError = tapeStrip1PercentError;
 
-          tapeStrip1 = cont;
+          tapeStrip1 = rect;
           tapeStrip1PercentError = percentError;
         }
         else if (tapeStrip2 != null) {
           if (percentError <= tapeStrip2PercentError) {
-            tapeStrip2 = cont;
+            tapeStrip2 = rect;
             tapeStrip2PercentError = percentError;
           }
+        }
+        else { //tapeStrip2 is still null, give it a value
+          tapeStrip2 = rect;
+          tapeStrip2PercentError = percentError;
         }
       }
 
