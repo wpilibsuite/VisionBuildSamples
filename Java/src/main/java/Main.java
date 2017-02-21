@@ -106,7 +106,16 @@ public class Main {
 
       ArrayList<Rect> contourRectangles = convertContoursToRects( pipeline.filterContoursOutput() );
 
-      ArrayList<Rect> tapeStrips = getTapeStrips(contours);
+      ArrayList<Rect> tapeStrips = getTapeStrips(contourRectangles);
+
+      /*if (Potato.isAFruit()) {
+        doAThing();
+
+        doSomeOtherThing();
+      }
+      else {
+        Potato.fruitify();
+      }*/
 
       for (MatOfPoint strip : tapeStrips) {
         if (strip != null) {
@@ -126,7 +135,7 @@ public class Main {
   }
 
   private static ArrayList<Rect> convertContoursToRects(ArrayList<MatOfPoint> contours) {
-    ArratyList<Rect> rectangles = new ArratyList<Rect>();
+    ArrayList<Rect> rectangles = new ArrayList<Rect>();
 
     for (MatOfPoint contour : contours) {
       rectangles.add( Imgproc.boundingRect( contour ) );
@@ -135,7 +144,7 @@ public class Main {
     return rectangles;
   }
 
-  private static ArrayList<Rect> getTapeStrips(ArrayList<Rect> rects) {
+  private static ArrayList<Rect> getTapeStrips(ArrayList<MatOfPoint> rects) {
     //expcted ration between width and height of tape
     double expectedRatio = 2/5;
 
@@ -144,7 +153,7 @@ public class Main {
 
     if (rects.size() > 0) {
 
-      Rect tapeStrip1 = contours.get(0);
+      Rect tapeStrip1 = rects.get(0);
       Rect tapeStrip2 = null;
 
       double tapeStrip1PercentError = getPercentError(tapeStrip1.width / tapeStrip1.height, expectedRatio);
