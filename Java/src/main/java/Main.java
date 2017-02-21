@@ -111,7 +111,7 @@ public class Main {
       for (MatOfPoint strip : tapeStrips) {
         if (strip != null) {
           //print out rectangles
-          System.out.println("Width: " + strip.width + ", Height: " + strip.height;
+          System.out.println("Width: " + strip.width + ", Height: " + strip.height);
 
           //output rects to image source
           Imgproc.rectangle(outputImage, new Point(strip.x, strip.y), new Point(strip.x + strip.width, strip.y + strip.height), new Scalar(255, 0, 0));
