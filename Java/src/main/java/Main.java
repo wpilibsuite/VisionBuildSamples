@@ -117,7 +117,7 @@ public class Main {
         Potato.fruitify();
       }*/
 
-      for (MatOfPoint strip : tapeStrips) {
+      for (Rect strip : tapeStrips) {
         if (strip != null) {
           //print out rectangles
           System.out.println("Width: " + strip.width + ", Height: " + strip.height);
@@ -144,7 +144,7 @@ public class Main {
     return rectangles;
   }
 
-  private static ArrayList<Rect> getTapeStrips(ArrayList<MatOfPoint> rects) {
+  private static ArrayList<Rect> getTapeStrips(ArrayList<Rect> rects) {
     //expcted ration between width and height of tape
     double expectedRatio = 2/5;
 
@@ -159,7 +159,7 @@ public class Main {
       double tapeStrip1PercentError = getPercentError(tapeStrip1.width / tapeStrip1.height, expectedRatio);
       double tapeStrip2PercentError = 255; //fair dice roll
 
-      for (MatOfPoint rect : rects) {
+      for (Rect rect : rects) {
         double ratio = rect.width / rect.height;
         double percentError = getPercentError(ratio, expectedRatio);
 
