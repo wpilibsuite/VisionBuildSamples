@@ -5,6 +5,13 @@ import edu.wpi.first.wpilibj.tables.*;
 import edu.wpi.cscore.*;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.core.Rect;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+
+import org.opencv.core.MatOfPoint;
+
+import java.util.Collections;
 
 public class Main {
   public static void main(String[] args) {
@@ -14,7 +21,7 @@ public class Main {
     // Connect NetworkTables, and get access to the publishing table
     NetworkTable.setClientMode();
     // Set your team number here
-    NetworkTable.setTeam(9999);
+    NetworkTable.setTeam(6624);
 
     NetworkTable.initialize();
 
@@ -48,28 +55,29 @@ public class Main {
       inputStream.setSource(camera);
     }
     */
-    
-      
+
+
 
     /***********************************************/
 
     // USB Camera
     /*
-    // This gets the image from a USB camera 
+    // This gets the image from a USB camera
     // Usually this will be on device 0, but there are other overloads
     // that can be used
+
+    */
     UsbCamera camera = setUsbCamera(0, inputStream);
     // Set the resolution for our camera, since this is over USB
     camera.setResolution(640,480);
-    */
 
-    // This creates a CvSink for us to use. This grabs images from our selected camera, 
+    // This creates a CvSink for us to use. This grabs images from our selected camera,
     // and will allow us to use those images in opencv
     CvSink imageSink = new CvSink("CV Image Grabber");
     imageSink.setSource(camera);
 
     // This creates a CvSource to use. This will take in a Mat image that has had OpenCV operations
-    // operations 
+    // operations
     CvSource imageSource = new CvSource("CV Image Source", VideoMode.PixelFormat.kMJPEG, 640, 480, 30);
     MjpegServer cvStream = new MjpegServer("CV Image Stream", 1186);
     cvStream.setSource(imageSource);
@@ -88,13 +96,104 @@ public class Main {
 
       // Below is where you would do your OpenCV operations on the provided image
       // The sample below just changes color source to HSV
-      Imgproc.cvtColor(inputImage, hsv, Imgproc.COLOR_BGR2HSV);
+      //Imgproc.cvtColor(inputImage, hsv, Imgproc.COLOR_BGR2HSV);
 
-      // Here is where you would write a processed image that you want to restreams
-      // This will most likely be a marked up image of what the camera sees
-      // For now, we are just going to stream the HSV image
-      imageSource.putFrame(hsv);
+      Mat outputImage = inputImage;
+
+      GripPipeline pipeline = new GripPipeline();
+
+      pipeline.process(inputImage);
+
+      ArrayList<Rect> contourRectangles = convertContoursToRects( pipeline.filterContoursOutput() );
+
+      ArrayList<Rect> tapeStrips = getTapeStrips(contourRectangles);
+
+      /*if (Potato.isAFruit()) {
+        doAThing();
+
+        doSomeOtherThing();
+      }
+      else {
+        Potato.fruitify();
+      }*/
+
+      for (Rect strip : tapeStrips) {
+        if (strip != null) {
+          //print out rectangles
+          System.out.println("Width: " + strip.width + ", Height: " + strip.height);
+
+          //output rects to image source
+          Imgproc.rectangle(outputImage, new Point(strip.x, strip.y), new Point(strip.x + strip.width, strip.y + strip.height), new Scalar(255, 0, 0));
+        }
+      }
+
+      System.out.println("------------------------------------------");
+
+      //output stream
+      imageSource.putFrame(outputImage);
     }
+  }
+
+  private static ArrayList<Rect> convertContoursToRects(ArrayList<MatOfPoint> contours) {
+    ArrayList<Rect> rectangles = new ArrayList<Rect>();
+
+    for (MatOfPoint contour : contours) {
+      rectangles.add( Imgproc.boundingRect( contour ) );
+    }
+
+    return rectangles;
+  }
+
+  private static ArrayList<Rect> getTapeStrips(ArrayList<Rect> rects) {
+    //expcted ration between width and height of tape
+    double expectedRatio = 2/5;
+
+    //returned arraylist that will contain the (presumed) 2 tape strips
+    ArrayList<Rect> returnList = new ArrayList<Rect>();
+
+    if (rects.size() > 0) {
+
+      Rect tapeStrip1 = rects.get(0);
+      Rect tapeStrip2 = null;
+
+      double tapeStrip1PercentError = getPercentError(tapeStrip1.width / tapeStrip1.height, expectedRatio);
+      double tapeStrip2PercentError = 255; //fair dice roll
+
+      for (Rect rect : rects) {
+        double ratio = rect.width / rect.height;
+        double percentError = getPercentError(ratio, expectedRatio);
+
+
+        if (percentError <= tapeStrip1PercentError) {
+          tapeStrip2 = tapeStrip1;
+          tapeStrip2PercentError = tapeStrip1PercentError;
+
+          tapeStrip1 = rect;
+          tapeStrip1PercentError = percentError;
+        }
+        else if (tapeStrip2 != null) {
+          if (percentError <= tapeStrip2PercentError) {
+            tapeStrip2 = rect;
+            tapeStrip2PercentError = percentError;
+          }
+        }
+        else { //tapeStrip2 is still null, give it a value
+          tapeStrip2 = rect;
+          tapeStrip2PercentError = percentError;
+        }
+      }
+
+      returnList.add(tapeStrip1);
+      returnList.add(tapeStrip2);
+
+    }
+
+    return returnList;
+
+  }
+
+  private static double getPercentError(double experimentalVal, double expectedVal) {
+    return (Math.abs(expectedVal - experimentalVal)/(expectedVal));
   }
 
   private static HttpCamera setHttpCamera(String cameraName, MjpegServer server) {
@@ -135,7 +234,7 @@ public class Main {
   }
 
   private static UsbCamera setUsbCamera(int cameraId, MjpegServer server) {
-    // This gets the image from a USB camera 
+    // This gets the image from a USB camera
     // Usually this will be on device 0, but there are other overloads
     // that can be used
     UsbCamera camera = new UsbCamera("CoprocessorCamera", cameraId);
