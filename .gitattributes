@@ -1,6 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
+# Force gradlew to have unix eols, so Windows does not break it
+gradlew text eol=lf
+
 # Custom for Visual Studio
 *.cs     diff=csharp
 
