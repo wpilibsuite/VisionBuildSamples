@@ -52,7 +52,7 @@ task downloadOpenCv() {
 
     doFirst {
         def classifier = getOpenCvPlatformPackage()
-        def armOpenCvDependency = project.dependencies.create("org.opencv:opencv-jni:+:$classifier@jar")
+        def armOpenCvDependency = project.dependencies.create("org.opencv:opencv-jni:3.1.0:$classifier@jar")
         def armOpenCvConfig = project.configurations.detachedConfiguration(armOpenCvDependency)
         armOpenCvConfig.setTransitive(false)
         armOpenCv = armOpenCvConfig.files[0].canonicalFile
